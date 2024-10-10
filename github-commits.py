@@ -81,7 +81,7 @@ def main():
 
     # Plotting
     plt.figure(figsize=(N_weeks/2, 4))
-    plt.imshow(grid, interpolation='none', cmap='binary', aspect='auto', origin='lower')
+    plt.imshow(grid, interpolation='none', cmap='Greens', aspect='auto', origin='lower')
 
     # Month labels
     month_positions = []
