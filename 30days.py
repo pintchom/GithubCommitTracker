@@ -5,7 +5,7 @@ import adafruit_ntp
 import rtc
 
 
-strip = neopixel.NeoPixel(board.GP28, 30)
+strip = neopixel.NeoPixel(board.GP28, 64, brightness=0.3)
 strip.fill((0, 0, 0))
 
 wifi.radio.connect(os.getenv("WIFI_SSID"), os.getenv("WIFI_PASSWORD"))
@@ -24,8 +24,8 @@ current_time = ntp.datetime
 rtc.RTC().datetime = current_time
 
 print("Current time:", time.localtime())
-thirty_days_ago = time.localtime(time.time() - 30 * 24 * 60 * 60)
-from_date = f"{thirty_days_ago.tm_year:04d}-{thirty_days_ago.tm_mon:02d}-{thirty_days_ago.tm_mday:02d}T00:00:00Z"
+sixty_four_days_ago = time.localtime(time.time() - 64 * 24 * 60 * 60)
+from_date = f"{sixty_four_days_ago.tm_year:04d}-{sixty_four_days_ago.tm_mon:02d}-{sixty_four_days_ago.tm_mday:02d}T00:00:00Z"
 to_date = f"{current_time.tm_year:04d}-{current_time.tm_mon:02d}-{current_time.tm_mday:02d}T23:59:59Z"
 
 query = f"""
@@ -67,9 +67,9 @@ for week in weeks:
 
 print(contribution_list)
 
-i = 0
-for contribution in contribution_list:
-    if contribution == 1:
-        strip[i] = (0, 255, 0)
-    i += 1
-
+for col in range(8):  # 8 columns for 8 weeks
+    for row in range(7):  # 7 rows for each day of the week (skipping the last row)
+        index = row * 8 + col  # Calculate the index in the contribution_list
+        if index < len(contribution_list) and contribution_list[index] == 1:
+            strip_index = col * 7 + row  # Calculate the index for the LED strip (7 LEDs per column)
+            strip[strip_index] = (0, 255, 0)
