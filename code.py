@@ -13,7 +13,7 @@ button_B_input = digitalio.DigitalInOut(board.GP18)
 button_B_input.switch_to_input(digitalio.Pull.UP)
 button_B = Button(button_B_input, value_when_pressed=True)
 
-strip = neopixel.NeoPixel(board.GP28, 64, brightness=0.3)
+strip = neopixel.NeoPixel(board.GP28, 64, brightness=0.01)
 strip.fill((0, 0, 0))
 
 wifi.radio.connect(os.getenv("WIFI_SSID"), os.getenv("WIFI_PASSWORD"))
@@ -78,6 +78,7 @@ for week in weeks:
 contribution_list = all_contributions[-64:]
 print(contribution_list)
 days_behind = 0
+
 while True:
     button_A.update()
     button_B.update()
@@ -85,7 +86,7 @@ while True:
         if (days_behind/7) >= 20:
             pass
         strip.fill((0,0,0))
-        days_behind += 8
+        days_behind += 7
         contribution_list = all_contributions[-(64+days_behind):-(days_behind)]
         print(contribution_list)
         print(f"Looking {days_behind} days behind")
@@ -93,19 +94,24 @@ while True:
         if days_behind == 0:
             pass
         strip.fill((0,0,0))
-        days_behind -= 8
+        days_behind -= 7
         if days_behind <= 0:
-            contribution_list = all_contributions[-(64):]
-            days_behind += 8
-            pass
+            contribution_list = all_contributions[-64:]
+            days_behind = 0
         else:
             contribution_list = all_contributions[-(64+days_behind):-(days_behind)]
         print(contribution_list)
         print(f"Looking {days_behind} days behind")
-    # else:
-    for col in range(8):  # 8 columns for 8 weeks
-        for row in range(7):  # 7 rows for each day of the week (skipping the last row)
-            index = row * 8 + col  # Calculate the index in the contribution_list
+
+    for col in range(8):  # 8 columns
+        for row in range(7):  # 7 rows
+            # Calculate index in contribution list - each column is a week
+            # Start from the rightmost column (most recent week)
+            week_offset = col  # 0 is leftmost column, 7 is rightmost
+            day_offset = row
+            index = week_offset * 7 + day_offset  # Most recent week on the right
+            
             if index < len(contribution_list) and contribution_list[index] == 1:
-                strip_index = col * 7 + row  # Calculate the index for the LED strip (7 LEDs per column)
+                # Calculate LED index - each column has 8 LEDs but we only use 7
+                strip_index = row * 8 + col
                 strip[strip_index] = (0, 255, 0)
